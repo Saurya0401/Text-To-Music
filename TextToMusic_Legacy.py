@@ -3,7 +3,7 @@ import _thread
 import playsound
 import random
 from tkinter import *
-from Progressions import Progressions, A, AS, B, C, CS, D, DS, E, F, FS, G, GS
+from Progressions_Legacy import Progressions, A, AS, B, C, CS, D, DS, E, F, FS, G, GS
 
 
 def num_to_chord():
