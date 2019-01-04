@@ -51,6 +51,7 @@ def text_to_music(phrase):
         filename = "audio files/{}__{}.wav".format(num_1[i-1], num_2[i-1])
         playsound.playsound(filename)
     # print(", ".join(str(x) for x in chords_playing))  for console
+    # TODO: Display chords dynamically instead at the end of each progression.
     chords_display.insert(END, chords_playing)
 
 
