@@ -9,8 +9,9 @@ def main():
     parts of the GUI window.
     """
 
-    # reset the part of the GUI that displays chords
+    # reset the GUI chords display and disable play_prog_button so that it cannot be pressed during a progression
     display_window.clear_chords_display()
+    display_window.disable_prog_button()
 
     # generate non-user inputs
     start_chord = random.randint(1, 24)
@@ -33,6 +34,9 @@ def main():
     for i in progression.chords:
         filename = "audio files/{}__{}.wav".format(progression.num_1[i-1], progression.num_2[i - 1])
         playsound.playsound(filename)
+        
+    # re-enable 'play_prog_button'
+    display_window.enable_prog_button()
 
 
 # generate the GUI window
