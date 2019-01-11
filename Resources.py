@@ -164,4 +164,19 @@ class GUI(tk.Tk):
         chords in the GUI window.
         """
 
+        self.chords[-1] += "/"
         self.chords_display.insert(tk.END, self.chords)
+
+    def disable_prog_button(self):
+        """
+        This method disables 'self.play_prog_button' when it is called.
+        """
+
+        self.play_prog_button.config(state="disabled")
+
+    def enable_prog_button(self):
+        """
+        This method re-enables 'self.play_prog_button' when it is called.
+        """
+        
+        self.play_prog_button.config(state="normal")
