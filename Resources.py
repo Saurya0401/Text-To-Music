@@ -18,7 +18,8 @@ class Progression:
     first chord was.
     'chord_dict' is a dictionary and is used to translate CNVs to chords.
     'chords_playing' is a purely numerical list that is initialised empty. When 'insert_chords_to_display(self)' is
-    called, all the CNVs in 'self.chords' are appended to this list. It is used to display chords in the GUI window.
+    called, all the CNVs in 'self.chords' are translated using 'chord_dict' and  appended to this list. It is used to
+    display chords in the GUI window.
     """
 
     first_chords = [int(i) for i in range(1, 25)]
@@ -37,8 +38,8 @@ class Progression:
         :param phrase: This is the input provided by the user. The input is a string.
         :param first_chord: This is the CNV of the first chord of a progression. This is provided by the main script and
          is a random integer between 1 and 24.
-        :param chords: Initially empty list. Based on how the progression is generated and managed, CNVs
-        are likewise appended and removed from this list.
+        :param chords: Initially only contains the CNV of the first chord of the progression. Based on how the
+        progression is generated and managed, CNVs are likewise appended and removed from this list.
         :param extra: Initially empty list. The method "manage_chords()" adds CNVs to this list if needed. The
         contents of this list are ultimately merged with 'self.chords'.
         :param num_1: A list of integers from 47845 to 47868. These numbers are part of the filename.
