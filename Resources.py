@@ -178,3 +178,4 @@ class GUI(tk.Tk):
             self.play_prog_button.config(state="disabled")
         elif arg == 1:
             self.play_prog_button.config(state="normal")
+
