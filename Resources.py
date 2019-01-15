@@ -167,17 +167,14 @@ class GUI(tk.Tk):
 
         self.chords.append("/")
         self.chords_display.insert(tk.END, self.chords)
-
-    def disable_prog_button(self):
-        """
-        This method disables 'self.play_prog_button' when it is called.
-        """
-
-        self.play_prog_button.config(state="disabled")
-
-    def enable_prog_button(self):
-        """
-        This method re-enables 'self.play_prog_button' when it is called.
-        """
         
-        self.play_prog_button.config(state="normal")
+    def prog_button_status(self, arg):
+        """
+        This method either disables or enables 'self.play_prog_button' depending on the argument passed.
+        :param arg: Value is either 0 or 1. 0 makes the method disable 'self.play_prog_button', 1 enables it.
+        """
+
+        if arg == 0:
+            self.play_prog_button.config(state="disabled")
+        elif arg == 1:
+            self.play_prog_button.config(state="normal")
