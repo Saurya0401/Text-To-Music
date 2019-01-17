@@ -6,17 +6,18 @@ from Resources import Progression, GUI
 def main():
     """
     This function is responsible for correctly generating the progression as well as managing both the progression and
-    parts of the GUI window.
+    part of the GUI window.
     """
 
-    # reset the GUI chords display and disable play_prog_button so that it cannot be pressed during a progression
+    # reset the GUI chords display and disable play_prog_button, export_prog_button
     display_window.clear_chords_display()
-    display_window.disable_prog_button()
+    display_window.prog_button_status(0)
+    display_window.export_button_status(0)
 
     # generate non-user inputs
     start_chord = random.randint(1, 24)
-    serial_number = [int(x) for x in range(47845, 47869)]
-    chord_number = [int(y) for y in range(1, 25)]
+    serial_number = range(47845, 47869)
+    chord_number = range(1, 25)
 
     # create a progression as an instance of the 'Progression' class
     progression = Progression(display_window.text_field.get(), start_chord, [start_chord], [], serial_number,
@@ -32,14 +33,22 @@ def main():
 
     # iterate over every value in 'progression.chords' and play the matching audio file
     for i in progression.chords:
-        filename = "audio files/{}__{}.wav".format(progression.num_1[i-1], progression.num_2[i - 1])
-        playsound.playsound(filename)
-        
-    # re-enable 'play_prog_button'
-    display_window.enable_prog_button()
+        try:
+            filename = "audio files/{}__{}.wav".format(progression.num_1[i-1], progression.num_2[i - 1])
+            playsound.playsound(filename)
+        except FileNotFoundError:
+            print('Error: audio files not found.')
+
+    # Enable progression to be exported to XML
+    display_window.exp_func = progression.export_progression()
+
+    # re-enable play_prog_button and 'export_prog_button'.
+    display_window.prog_button_status(1)
+    display_window.export_button_status(1)
 
 
 # generate the GUI window
 display_window = GUI(main, Progression.chords_playing)
 display_window.mainloop()
+
 
