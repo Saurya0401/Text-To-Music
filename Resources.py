@@ -1,6 +1,9 @@
 import tkinter as tk
 import _thread
 import random
+import lxml.etree as et
+import os
+from datetime import datetime
 
 
 class Progression:
@@ -17,9 +20,12 @@ class Progression:
     'extension_dict' is a dictionary and is used to generate the next few CNVs of a progression depending on what the
     first chord was.
     'chord_dict' is a dictionary and is used to translate CNVs to chords.
+    'prog_dict' is a dictionary where the keys are the CNVs of all the first chords and their corresponding values are
+    all lists containing every progression in chord form. It is used to identify a progression from the first chord.
     'chords_playing' is a purely numerical list that is initialised empty. When 'insert_chords_to_display(self)' is
     called, all the CNVs in 'self.chords' are translated using 'chord_dict' and  appended to this list. It is used to
     display chords in the GUI window.
+    'timestamp' is self-explanatory.
     """
 
     first_chords = [int(i) for i in range(1, 25)]
@@ -29,15 +35,26 @@ class Progression:
                       16: [11, 12, 2, 9, 16, 9, 11], 17: [1, 8, 3], 18: [2, 9, 4], 19: [3, 10, 5], 20: [4, 11, 6],
                       21: [16, 5, 14], 22: [6, 1, 8], 23: [7, 2, 9], 24: [8, 3, 10]}
     chord_dict = {1: "A", 2: "A#", 3: "B", 4: "C", 5: "C#", 6: "D", 7: "D#", 8: "E", 9: "F", 10: "F#", 11: "G",
-                  12: "G#", 13: "Am", 14: "A#m", 15: "Bm", 16: "Cm", 17: "C#m", 18: "Dm", 19: "D#m", 20: "E#m",
+                  12: "G#", 13: "Am", 14: "A#m", 15: "Bm", 16: "Cm", 17: "C#m", 18: "Dm", 19: "D#m", 20: "Em",
                   21: "Fm", 22: "F#m", 23: "Gm", 24: "G#m"}
+    prog_dict = {1: ['A', 'E', 'F#m', 'D'], 2: ['A#', 'D#', 'A#', 'Gm'],
+                 3: ['B', 'F#', 'G#m', 'D#m', 'E', 'B', 'E', 'F#m'], 4: ['C', 'G', 'Am', 'F'],
+                 5: ['C#', 'G#m', 'A#m', 'F#'], 6: ['D', 'A', 'Bm', 'F#m', 'G', 'D', 'G', 'A'],
+                 7: ['D#', 'A#', 'Bm', 'G#'], 8: ['E', 'B', 'C#m', 'G#m', 'A', 'E', 'A', 'B'],
+                 9: ['F', 'C', 'Dm', 'A#'], 10: ['F#', 'C#', 'D#m', 'B'], 11: ['G', 'C', 'D', 'E'],
+                 12: ['G#', 'D#', 'Em', 'C#'], 13: ['Am', 'F', 'C', 'G'], 14: ['A#m', 'D#m', 'C#', 'F#'],
+                 15: ['Bm', 'G', 'D', 'A'], 16: ['Cm', 'G', 'G#', 'A#', 'F', 'Cm', 'F', 'G'],
+                 17: ['C#m', 'A', 'E', 'B'], 18: ['Dm', 'A#', 'F', 'C'], 19: ['D#m', 'B', 'F#', 'C#'],
+                 20: ['Em', 'C', 'G', 'D'], 21: ['Fm', 'Cm', 'C#', 'A#m'], 22: ['F#m', 'D', 'A', 'E'],
+                 23: ['Gm', 'D#', 'A#', 'F'], 24: ['G#m', 'E', 'B', 'F#']}
     chords_playing = []
+    timestamp = datetime.now()
 
     def __init__(self, phrase, first_chord, chords=None, extra=None, num_1=None, num_2=None):
         """
-        :param phrase: This is the input provided by the user. The input is a string.
-        :param first_chord: This is the CNV of the first chord of a progression. This is provided by the main script and
-         is a random integer between 1 and 24.
+        :param phrase: This is the input provided by the user. It is a string.
+        :param first_chord: This is the CNV of the first chord of a progression. It is provided by the main script and
+        is a random integer between 1 and 24.
         :param chords: Initially only contains the CNV of the first chord of the progression. Based on how the
         progression is generated and managed, CNVs are likewise appended and removed from this list.
         :param extra: Initially empty list. The method "manage_chords()" adds CNVs to this list if needed. The
@@ -65,6 +82,7 @@ class Progression:
             self.num_2 = []
         else:
             self.num_2 = num_2
+        self.prog_id = [i for i in self.prog_dict[self.first_chord] if i != "/"]
 
     def add_chords(self):
         """
@@ -72,6 +90,23 @@ class Progression:
         """
 
         self.chords.extend(self.extra)
+
+    def export_progression(self):
+        """
+        This method exports the chords in 'self.chords_playing' as an XML file.
+        """
+
+        root = et.Element('progression')
+        p_type = et.SubElement(root, 'type')
+        p_type.text = "{} {}".format(" ".join(self.prog_id), "progression")
+        chords = et.SubElement(root, 'chords')
+        chords.text = " - ".join(i for i in self.chords_playing if i != "/")
+        export_data = et.tostring(root, encoding='unicode', pretty_print=True)
+        filename = "{} ".format("".join(self.prog_id), "Progression") + self.timestamp.strftime("%d-%m-%Y") + ".xml"
+        if not os.path.exists('progressions'):
+            os.mkdir('progressions')
+        xml_file = open('progressions/{}'.format(filename), 'w')
+        xml_file.write(export_data)
 
     def generate_progression(self):
         """
@@ -118,16 +153,19 @@ class GUI(tk.Tk):
     This class contains the methods needed to display and control the GUI window using tkinter.
     """
 
-    def __init__(self, func, chords):
+    def __init__(self, func, chords, exp_func=None):
         """
         :param func: This is the main function that is passed in.
         :param chords: Initially empty list. When the GUI window is initiated, the contents of this list become
+        :param exp_func: Initialised with None. Later in the main script, None is replaced with 'export_progression()"
+        from the Progression class.
         identical to the contents of the variable 'chords_playing' in the class 'Progression'.
         """
 
         tk.Tk.__init__(self)
         GUI.title(self, "Text To Music")
         self.func = func
+        self.exp_func = exp_func
         self.chords = chords
 
         # Start defining GUI components
@@ -150,6 +188,9 @@ class GUI(tk.Tk):
         self.scrollbar.grid(row=1, column=2)
         self.chords_display.config(yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.chords_display.yview)
+        self.export_prog_button = tk.Button(self.output_frame, text="Export Progression",
+                                            command=exp_func, state="disabled")
+        self.export_prog_button.grid(row=2, column=0, pady=5)
         # Finished defining GUI components
 
     def clear_chords_display(self):
@@ -167,7 +208,7 @@ class GUI(tk.Tk):
 
         self.chords.append("/")
         self.chords_display.insert(tk.END, self.chords)
-        
+
     def prog_button_status(self, arg):
         """
         This method either disables or enables 'self.play_prog_button' depending on the argument passed.
@@ -179,3 +220,13 @@ class GUI(tk.Tk):
         elif arg == 1:
             self.play_prog_button.config(state="normal")
 
+    def export_button_status(self, arg):
+        """
+        This method either disables or enables 'self.export_prog_button' depending on the argument passed.
+        :param arg: Value is either 0 or 1. 0 makes the method disable 'self.play_prog_button', 1 enables it.
+        """
+
+        if arg == 0:
+            self.export_prog_button.config(state="disabled")
+        elif arg == 1:
+            self.export_prog_button.config(state="normal")
