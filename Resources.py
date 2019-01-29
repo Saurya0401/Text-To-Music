@@ -2,8 +2,9 @@ import tkinter as tk
 import _thread
 import random
 import lxml.etree as et
-import os
+from os import path, mkdir
 from datetime import datetime
+from tkinter import filedialog
 
 
 class Progression:
@@ -15,7 +16,7 @@ class Progression:
     Class Variables
     ---------------
     There are four class variables, 'first_chords', 'extension_dict', 'chord_dict' and 'chords_playing'.
-    'first_chords' is a purely numerical list and the CNV of the first chord of every progression will belong to this
+    'first_chords' is a purely numerical list and the CNV of the first chord of every progression will be from this
     list.
     'extension_dict' is a dictionary and is used to generate the next few CNVs of a progression depending on what the
     first chord was.
@@ -97,16 +98,19 @@ class Progression:
         """
 
         root = et.Element('progression')
+        cnv = et.SubElement(root, 'CNV')
+        cnv.text = " ".join(str(i) for i in self.chords)
         p_type = et.SubElement(root, 'type')
         p_type.text = "{} {}".format(" ".join(self.prog_id), "progression")
         chords = et.SubElement(root, 'chords')
         chords.text = " - ".join(i for i in self.chords_playing if i != "/")
         export_data = et.tostring(root, encoding='unicode', pretty_print=True)
         filename = "{} ".format("".join(self.prog_id), "Progression") + self.timestamp.strftime("%d-%m-%Y") + ".xml"
-        if not os.path.exists('progressions'):
-            os.mkdir('progressions')
+        if not path.exists('progressions'):
+            mkdir('progressions')
         xml_file = open('progressions/{}'.format(filename), 'w')
         xml_file.write(export_data)
+        xml_file.close()
 
     def generate_progression(self):
         """
@@ -126,6 +130,15 @@ class Progression:
         for i in self.chords:
             if i in Progression.chord_dict.keys():
                 Progression.chords_playing.append(Progression.chord_dict[i])
+
+    def load_progression(self):
+        # TODO: Fix this.
+        prog = GUI.load_file()
+        tree = et.parse(prog)
+        root = tree.getroot()
+        cnv = root[0].text
+        for i in cnv:
+            self.chords.append(i)
 
     def manage_chords(self):
         """
@@ -180,6 +193,8 @@ class GUI(tk.Tk):
         self.play_prog_button = tk.Button(self.input_frame, text="Play Progression!", command=lambda: _thread.
                                           start_new_thread(func, ()), bg="blue", fg="white")
         self.play_prog_button.grid(row=0, column=2, padx=5)
+        self.load_prog_button = tk.Button(self.input_frame, text="Load Progression", command=self.load_file)
+        self.load_prog_button.grid(row=0, column=3, padx=5)
         self.chord_title = tk.Label(self.output_frame, text="Chords in this progression: ")
         self.chord_title.grid(row=0, column=0)
         self.chords_display = tk.Text(self.output_frame, height=2, width=40)
@@ -230,3 +245,10 @@ class GUI(tk.Tk):
             self.export_prog_button.config(state="disabled")
         elif arg == 1:
             self.export_prog_button.config(state="normal")
+
+    @staticmethod
+    def load_file():
+        file = tk.filedialog.askopenfilename(filetypes=(("XML Files", '*.xml'), ("All Files", '*.*')))
+        return file
+
+
