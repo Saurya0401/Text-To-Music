@@ -4,7 +4,7 @@ import random
 import lxml.etree as et
 from os import path, mkdir
 from datetime import datetime
-from tkinter import filedialog
+# from tkinter import filedialog
 
 
 class Progression:
@@ -96,14 +96,14 @@ class Progression:
         """
         This method exports the chords in 'self.chords_playing' as an XML file.
         """
-
+        
         root = et.Element('progression')
         cnv = et.SubElement(root, 'CNV')
         cnv.text = " ".join(str(i) for i in self.chords)
         p_type = et.SubElement(root, 'type')
         p_type.text = "{} {}".format(" ".join(self.prog_id), "progression")
         chords = et.SubElement(root, 'chords')
-        chords.text = " - ".join(i for i in self.chords_playing if i != "/")
+        chords.text = " ".join(i for i in self.chords_playing if i != "/")
         export_data = et.tostring(root, encoding='unicode', pretty_print=True)
         filename = "{} ".format("".join(self.prog_id), "Progression") + self.timestamp.strftime("%d-%m-%Y") + ".xml"
         if not path.exists('progressions'):
@@ -131,14 +131,14 @@ class Progression:
             if i in Progression.chord_dict.keys():
                 Progression.chords_playing.append(Progression.chord_dict[i])
 
-    def load_progression(self):
-        # TODO: Fix this.
-        prog = GUI.load_file()
-        tree = et.parse(prog)
-        root = tree.getroot()
-        cnv = root[0].text
-        for i in cnv:
-            self.chords.append(i)
+    # def load_progression(self):
+    #     # TODO: Fix this.
+    #     prog = GUI.load_file()
+    #     tree = et.parse(prog)
+    #     root = tree.getroot()
+    #     cnv = root[0].text
+    #     for i in cnv:
+    #         self.chords.append(i)
 
     def manage_chords(self):
         """
@@ -169,10 +169,10 @@ class GUI(tk.Tk):
     def __init__(self, func, chords, exp_func=None):
         """
         :param func: This is the main function that is passed in.
-        :param chords: Initially empty list. When the GUI window is initiated, the contents of this list become
+        :param chords: Initially empty list. When the GUI window is initiated, the contents of this list becomes
+        identical to the contents of the variable 'chords_playing' in the class 'Progression'.
         :param exp_func: Initialised with None. Later in the main script, None is replaced with 'export_progression()"
         from the Progression class.
-        identical to the contents of the variable 'chords_playing' in the class 'Progression'.
         """
 
         tk.Tk.__init__(self)
@@ -193,8 +193,8 @@ class GUI(tk.Tk):
         self.play_prog_button = tk.Button(self.input_frame, text="Play Progression!", command=lambda: _thread.
                                           start_new_thread(func, ()), bg="blue", fg="white")
         self.play_prog_button.grid(row=0, column=2, padx=5)
-        self.load_prog_button = tk.Button(self.input_frame, text="Load Progression", command=self.load_file)
-        self.load_prog_button.grid(row=0, column=3, padx=5)
+        # self.load_prog_button = tk.Button(self.input_frame, text="Load Progression", command=self.load_file)
+        # self.load_prog_button.grid(row=0, column=3, padx=5)
         self.chord_title = tk.Label(self.output_frame, text="Chords in this progression: ")
         self.chord_title.grid(row=0, column=0)
         self.chords_display = tk.Text(self.output_frame, height=2, width=40)
@@ -203,6 +203,7 @@ class GUI(tk.Tk):
         self.scrollbar.grid(row=1, column=2)
         self.chords_display.config(yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.chords_display.yview)
+        # TODO: Refer exp_func instead of calling it when the GUI window is initialised.
         self.export_prog_button = tk.Button(self.output_frame, text="Export Progression",
                                             command=exp_func, state="disabled")
         self.export_prog_button.grid(row=2, column=0, pady=5)
@@ -224,31 +225,21 @@ class GUI(tk.Tk):
         self.chords.append("/")
         self.chords_display.insert(tk.END, self.chords)
 
-    def prog_button_status(self, arg):
-        """
-        This method either disables or enables 'self.play_prog_button' depending on the argument passed.
-        :param arg: Value is either 0 or 1. 0 makes the method disable 'self.play_prog_button', 1 enables it.
-        """
-
-        if arg == 0:
-            self.play_prog_button.config(state="disabled")
-        elif arg == 1:
-            self.play_prog_button.config(state="normal")
-
-    def export_button_status(self, arg):
-        """
-        This method either disables or enables 'self.export_prog_button' depending on the argument passed.
-        :param arg: Value is either 0 or 1. 0 makes the method disable 'self.play_prog_button', 1 enables it.
-        """
-
-        if arg == 0:
-            self.export_prog_button.config(state="disabled")
-        elif arg == 1:
-            self.export_prog_button.config(state="normal")
-
     @staticmethod
-    def load_file():
-        file = tk.filedialog.askopenfilename(filetypes=(("XML Files", '*.xml'), ("All Files", '*.*')))
-        return file
+    def button_status(button, arg):
+        """
+        Enables or disables a GUI button. Is a static method.
+        :param button: The button to be disabled
+        :param arg: Passing 0 disables the button, 1 enables it. Passing any other value will raise an error.
+        """
 
+        if arg == 0:
+            button.config(state="disabled")
+        elif arg == 1:
+            button.config(state="normal")
 
+    # @staticmethod
+    # def load_file():
+    #     file = tk.filedialog.askopenfilename(filetypes=(("XML Files", '*.xml'), ("All Files", '*.*')))
+    #     return file
+    
