@@ -9,10 +9,9 @@ def main():
     part of the GUI window.
     """
 
-    # reset the GUI chords display and disable play_prog_button, export_prog_button
+    # reset the GUI chords display and disable play_prog_button
     display_window.clear_chords_display()
-    display_window.prog_button_status(0)
-    display_window.export_button_status(0)
+    display_window.button_status(display_window.play_prog_button, 0)
 
     # generate non-user inputs
     start_chord = random.randint(1, 24)
@@ -39,16 +38,14 @@ def main():
         except FileNotFoundError:
             print('Error: audio files not found.')
 
+    # re-enable play_prog_button and 'export_prog_button'.
+    display_window.button_status(display_window.play_prog_button, 1)
+    display_window.button_status(display_window.export_prog_button, 1)
+
     # Enable progression to be exported to XML
     display_window.exp_func = progression.export_progression()
-
-    # re-enable play_prog_button and 'export_prog_button'.
-    display_window.prog_button_status(1)
-    display_window.export_button_status(1)
 
 
 # generate the GUI window
 display_window = GUI(main, Progression.chords_playing)
 display_window.mainloop()
-
-
